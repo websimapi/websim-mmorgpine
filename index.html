@@ -18,7 +18,7 @@
 <body>
     <div id="game-container">
         <canvas id="game-canvas"></canvas>
-        <div id="ui-overlay" class="hidden">
+        <div id="ui-overlay">
             <div id="editor-panel" class="panel hidden">
                 <h2>Level Editor</h2>
                 <div id="editor-tools"></div>
@@ -30,6 +30,13 @@
             <div id="asset-panel" class="panel hidden">
                 <h2>Asset Manager</h2>
                 <div id="asset-tools"></div>
+            </div>
+            
+            <!-- Control Panel with Buttons instead of F-keys -->
+            <div id="control-panel">
+                <div id="debug-button" class="control-button">Debug</div>
+                <div id="editor-button" class="control-button">Editor</div>
+                <div id="asset-button" class="control-button">Assets</div>
             </div>
         </div>
     </div>

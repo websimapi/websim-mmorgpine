@@ -2,10 +2,10 @@
  * MMORPGine - Main Entry Point
  * Initializes the game engine and sets up the demo scene
  */
- 
+
 import { Engine } from './engine/core/Engine.js';
 import { ComponentTypes } from './engine/managers/EntityManager.js';
- 
+
 // Create an instance of the engine with initial configuration
 const engine = new Engine({
     // Debug mode
@@ -25,7 +25,7 @@ const engine = new Engine({
         theme: 'dark'
     }
 });
- 
+
 // Wait for DOM to be ready
 document.addEventListener('DOMContentLoaded', async () => {
     // Initialize the engine
@@ -34,13 +34,94 @@ document.addEventListener('DOMContentLoaded', async () => {
     // Set up a test demo scene
     setupDemoScene();
     
+    // Set up the UI controls (replacing F-keys)
+    setupUIControls();
+    
     // Start the engine
     engine.start();
     
     // Log that the engine is running
     console.log('MMORPGine is running');
 });
- 
+
+/**
+ * Set up UI control buttons
+ */
+function setupUIControls() {
+    // Get button elements
+    const debugButton = document.getElementById('debug-button');
+    const editorButton = document.getElementById('editor-button');
+    const assetButton = document.getElementById('asset-button');
+    
+    // Debug button
+    if (debugButton) {
+        // Set initial state
+        if (engine.debugMode) {
+            debugButton.classList.add('active');
+        }
+        
+        debugButton.addEventListener('click', () => {
+            engine.toggleDebugMode();
+            debugButton.classList.toggle('active', engine.debugMode);
+        });
+    }
+    
+    // Editor button
+    if (editorButton) {
+        // Check if editor panel is visible
+        const editorPanel = document.getElementById('editor-panel');
+        const isEditorVisible = editorPanel && !editorPanel.classList.contains('hidden');
+        
+        if (isEditorVisible) {
+            editorButton.classList.add('active');
+        }
+        
+        editorButton.addEventListener('click', () => {
+            engine.uiManager.togglePanel('editor');
+            const isVisible = !document.getElementById('editor-panel').classList.contains('hidden');
+            editorButton.classList.toggle('active', isVisible);
+        });
+    }
+    
+    // Asset button
+    if (assetButton) {
+        // Check if asset panel is visible
+        const assetPanel = document.getElementById('asset-panel');
+        const isAssetVisible = assetPanel && !assetPanel.classList.contains('hidden');
+        
+        if (isAssetVisible) {
+            assetButton.classList.add('active');
+        }
+        
+        assetButton.addEventListener('click', () => {
+            engine.uiManager.togglePanel('asset');
+            const isVisible = !document.getElementById('asset-panel').classList.contains('hidden');
+            assetButton.classList.toggle('active', isVisible);
+        });
+    }
+    
+    // Subscribe to panel visibility events to sync button states
+    engine.events.on('ui:panelShow', ({ panelId }) => {
+        if (panelId === 'debug' && debugButton) {
+            debugButton.classList.add('active');
+        } else if (panelId === 'editor' && editorButton) {
+            editorButton.classList.add('active');
+        } else if (panelId === 'asset' && assetButton) {
+            assetButton.classList.add('active');
+        }
+    });
+    
+    engine.events.on('ui:panelHide', ({ panelId }) => {
+        if (panelId === 'debug' && debugButton) {
+            debugButton.classList.remove('active');
+        } else if (panelId === 'editor' && editorButton) {
+            editorButton.classList.remove('active');
+        } else if (panelId === 'asset' && assetButton) {
+            assetButton.classList.remove('active');
+        }
+    });
+}
+
 /**
  * Set up a simple demo scene
  */
@@ -74,40 +155,13 @@ async function setupDemoScene() {
         name: engine.networkManager.username || 'Player'
     });
     
-    // Listen for keyboard input
-    engine.events.on('input:keyDown', ({ key }) => {
-        console.log(`Key pressed: ${key}`);
-        
-        // Toggle debug mode with F2
-        if (key === 'f2') {
-            engine.toggleDebugMode();
-        }
-        
-        // Toggle editor panel with F3
-        if (key === 'f3') {
-            engine.uiManager.togglePanel('editor');
-        }
-        
-        // Toggle asset panel with F4
-        if (key === 'f4') {
-            engine.uiManager.togglePanel('asset');
-        }
-    });
-    
-    // Listen for network messages
-    engine.events.on('network:message', (message) => {
-        if (message.type === 'chat') {
-            console.log(`Chat message from ${message.username}: ${message.text}`);
-        }
-    });
-    
     // Create tweakable UI for engine parameters
     createTweakableControls();
     
     // Demo of AI asset generation
     await demoAIAssetGeneration();
 }
- 
+
 /**
  * Create UI controls for tweakable parameters
  */
@@ -130,7 +184,7 @@ function createTweakableControls() {
         }
     }
 }
- 
+
 /**
  * Demo AI asset generation capabilities
  */
@@ -208,9 +262,6 @@ async function demoAIAssetGeneration() {
             contentContainer.appendChild(contentPromptText);
             
             assetsContainer.appendChild(contentContainer);
-            
-            // Show the asset panel when done
-            engine.uiManager.showPanel('asset');
         }
     } catch (error) {
         console.error('Error in AI asset generation demo:', error);

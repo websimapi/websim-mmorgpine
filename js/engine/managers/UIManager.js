@@ -376,8 +376,14 @@ export class UIManager {
             if (show) {
                 this.debugPanel.classList.remove('hidden');
                 this._updateDebugInfo(); // Initial update
+                
+                // Emit panel show event
+                this.engine.events.emit('ui:panelShow', { panelId: 'debug' });
             } else {
                 this.debugPanel.classList.add('hidden');
+                
+                // Emit panel hide event
+                this.engine.events.emit('ui:panelHide', { panelId: 'debug' });
             }
         }
     }
